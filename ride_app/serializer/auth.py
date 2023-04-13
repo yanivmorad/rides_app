@@ -4,8 +4,6 @@ from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 
 from ride_app.models import UserProfile
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -42,15 +40,21 @@ class SignupSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
-
+        print(profile_data)
         if profile_data:
-            profile = UserProfile.objects.create(
+            profile, created = UserProfile.objects.get_or_create(
                 user=user,
-                picture_url=profile_data.get('picture_url', ''),
-                address=profile_data.get('address', ''),
-                gender=profile_data.get('gender', ''),
+                defaults={
+                    'picture_url': profile_data.get('picture_url', ''),
+                    'address': profile_data.get('address', ''),
+                    'gender': profile_data.get('gender', ''),
+                }
             )
-            profile.save()
+            if not created:
+                profile.picture_url = profile_data.get('picture_url', '')
+                profile.address = profile_data.get('address', '')
+                profile.gender = profile_data.get('gender', '')
+                profile.save()
             user.profile = profile
             user.save()
 
@@ -58,14 +62,52 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = UserProfileSerializer()
+    picture_url = serializers.CharField(source='profile.picture_url')
+    address = serializers.CharField(source='profile.address')
+    gender = serializers.CharField(source='profile.gender')
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'profile')
+        fields = ('email', 'first_name', 'last_name', 'picture_url', 'address', 'gender')
 
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created and not hasattr(instance, 'profile'):
-        UserProfile.objects.create(user=instance)
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(required=False)
+
+    class Meta:
+        model = User
+        fields = ( 'email', 'first_name', 'last_name', 'profile')
+
+
+    email = serializers.EmailField(
+        write_only=True,
+        required=False,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    first_name = serializers.CharField(write_only=True, required=False)
+    last_name = serializers.CharField(write_only=True, required=False)
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', None)
+        if profile_data:
+            profile, created = UserProfile.objects.get_or_create(
+                user=instance,
+                defaults={
+                    'picture_url': profile_data.get('picture_url', instance.profile.picture_url),
+                    'address': profile_data.get('address', instance.profile.address),
+                    'gender': profile_data.get('gender', instance.profile.gender),
+                }
+            )
+            if not created:
+                profile.picture_url = profile_data.get('picture_url', instance.profile.picture_url)
+                profile.address = profile_data.get('address', instance.profile.address)
+                profile.gender = profile_data.get('gender', instance.profile.gender)
+                profile.save()
+            instance.profile = profile
+
+        instance.email = validated_data.get('email', instance.email)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.save()
+        return instance
