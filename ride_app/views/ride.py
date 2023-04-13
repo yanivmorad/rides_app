@@ -23,15 +23,7 @@ class RidesViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [RidesPermissions]
     serializer_class = RideSerializer
-
-    def create(self, request, *args, **kwargs):
-        # Set the user field to the current user based on the JWT token
-        request.data['user'] = request.user.id
-
-    #     # Call the default create method with the modified data
-        return super().create(request, *args, **kwargs)
-
-    def get_ride(self):
+    def get_queryset(self):
         qs = self.queryset
         print(qs)
         if 'user' in self.request.query_params:
@@ -50,4 +42,13 @@ class RidesViewSet(viewsets.ModelViewSet):
             qs = qs.filter(status=self.request.query_params['status'])
 
         return qs
+
+
+    def create(self, request, *args, **kwargs):
+        # Set the user field to the current user based on the JWT token
+        request.data['user'] = request.user.id
+
+    #     # Call the default create method with the modified data
+        return super().create(request, *args, **kwargs)
+
 
