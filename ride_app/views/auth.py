@@ -1,10 +1,11 @@
 
 from django.contrib.auth.models import User
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import mixins, status
+from rest_framework import mixins, status, viewsets
 
 from ride_app.serializer.auth import SignupSerializer, UserSerializer, UserProfileSerializer, UpdateUserSerializer
 
@@ -60,3 +61,7 @@ def update_user(request):
         return Response(data=data, status=status.HTTP_201_CREATED)
     else:
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class UserDetail(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
