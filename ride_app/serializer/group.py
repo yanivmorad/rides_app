@@ -1,13 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-<<<<<<< HEAD
-from rest_framework.validators import UniqueValidator
-
-from ride_app.models import Member, Group, UserProfile
-=======
 
 from ride_app.models import Member, Group
->>>>>>> origin/main
+
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -32,7 +27,6 @@ class CreateGroupSerializer(serializers.ModelSerializer):
         group = Group.objects.create(**validated_data)
         Member.objects.create(user=self.context['request'].user, group=group)
         return group
-<<<<<<< HEAD
 from rest_framework import serializers
 from ride_app.models import Member, Group
 
@@ -59,24 +53,23 @@ class AddToGroupSerializer(serializers.ModelSerializer):
         return member
 
 
-=======
 
 
-class AddToGroupSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    group_id = serializers.IntegerField()
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        group = Group.objects.get(id=validated_data['group_id'], member__user=user,)
-        member = Member.objects.create(user_id=validated_data['user_id'], group=group)
-        return member
-
-    def test_func(self):
-        user = self.request.user
-        group_id = self.validated_data.get('group_id')
-        group = Group.objects.get(id=group_id)
-        return group.owner == user
+# class AddToGroupSerializer(serializers.Serializer):
+#     user_id = serializers.IntegerField()
+#     group_id = serializers.IntegerField()
+#
+#     def create(self, validated_data):
+#         user = self.context['request'].user
+#         group = Group.objects.get(id=validated_data['group_id'], member__user=user,)
+#         member = Member.objects.create(user_id=validated_data['user_id'], group=group)
+#         return member
+#
+#     def test_func(self):
+#         user = self.request.user
+#         group_id = self.validated_data.get('group_id')
+#         group = Group.objects.get(id=group_id)
+#         return group.owner == user
 
 class RemoveFromGroupSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
@@ -93,4 +86,3 @@ class RemoveFromGroupSerializer(serializers.Serializer):
         group_id = self.validated_data.get('group_id')
         group = Group.objects.get(id=group_id)
         return group.owner == user
->>>>>>> origin/main

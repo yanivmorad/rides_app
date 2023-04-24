@@ -10,8 +10,10 @@ class Ride(models.Model):
     to_location = models.CharField(max_length=100)
     datetime = models.DateTimeField()
     is_request = models.BooleanField(default=False)
-    price = models.DecimalField(max_digits=8, decimal_places=2,default=0)
-    status = models.CharField(max_length=20, choices=[('requested', 'Requested'), ('accepted', 'Accepted'), ('completed', 'Completed'), ('cancelled', 'Cancelled')], default='requested')
+    price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    status = models.CharField(max_length=20,
+                              choices=[('requested', 'Requested'), ('accepted', 'Accepted'), ('completed', 'Completed'),
+                                       ('cancelled', 'Cancelled')], default='requested')
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -39,23 +41,8 @@ class Member(models.Model):
 class Group(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=256,blank=True, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_groups', null=True, blank=True,
+                              default=None)
 
     class Meta:
         db_table = 'group'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
