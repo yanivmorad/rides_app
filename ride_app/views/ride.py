@@ -25,7 +25,6 @@ class RidesViewSet(viewsets.ModelViewSet):
     serializer_class = RideSerializer
     def get_queryset(self):
         qs = self.queryset
-        print(qs)
         if 'user' in self.request.query_params:
             qs = qs.filter(user=self.request.query_params['user'])
         if 'from_location' in self.request.query_params:

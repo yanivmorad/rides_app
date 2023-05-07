@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from ride_app.models import Member, Group
+from rest_framework import serializers
+from ride_app.models import Member, Group
 
 
 
@@ -27,8 +29,7 @@ class CreateGroupSerializer(serializers.ModelSerializer):
         group = Group.objects.create(**validated_data)
         Member.objects.create(user=self.context['request'].user, group=group)
         return group
-from rest_framework import serializers
-from ride_app.models import Member, Group
+
 
 class AddToGroupSerializer(serializers.ModelSerializer):
     class Meta:
