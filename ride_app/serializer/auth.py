@@ -65,10 +65,11 @@ class UserSerializer(serializers.ModelSerializer):
     picture_url = serializers.CharField(source='profile.picture_url')
     address = serializers.CharField(source='profile.address')
     gender = serializers.CharField(source='profile.gender')
+    phone_number = serializers.CharField(source='profile.phone_number')
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'picture_url', 'address', 'gender')
+        fields = ('email', 'first_name', 'last_name', 'picture_url', 'address', 'gender','phone_number')
 
 
 

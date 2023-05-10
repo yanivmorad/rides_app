@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import viewsets
 from rest_framework.permissions import  BasePermission
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -19,7 +21,7 @@ class RidesPermissions(BasePermission):
 
 
 class RidesViewSet(viewsets.ModelViewSet):
-    queryset = Ride.objects.all()
+    queryset = Ride.objects.order_by("-id")
     authentication_classes = [JWTAuthentication]
     permission_classes = [RidesPermissions]
     serializer_class = RideSerializer
@@ -32,7 +34,9 @@ class RidesViewSet(viewsets.ModelViewSet):
         if 'to_location' in self.request.query_params:
             qs = qs.filter(to_location=self.request.query_params['to_location'])
         if 'datetime' in self.request.query_params:
-            qs = qs.filter(datetime=self.request.query_params['datetime'])
+            date_str = self.request.query_params['datetime']
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            qs = qs.filter(datetime__date=date_obj)
         if 'is_request' in self.request.query_params:
             qs = qs.filter(is_request=self.request.query_params['is_request'])
         if 'price' in self.request.query_params:
