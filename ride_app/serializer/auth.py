@@ -7,9 +7,10 @@ from ride_app.models import UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = UserProfile
-        fields = ('picture_url', 'address', 'gender')
+        fields = ('picture_url', 'address', 'gender','phone_number')
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -40,26 +41,12 @@ class SignupSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
-        print(profile_data)
+
         if profile_data:
-            profile, created = UserProfile.objects.get_or_create(
-                user=user,
-                defaults={
-                    'picture_url': profile_data.get('picture_url', ''),
-                    'address': profile_data.get('address', ''),
-                    'gender': profile_data.get('gender', ''),
-                }
-            )
-            if not created:
-                profile.picture_url = profile_data.get('picture_url', '')
-                profile.address = profile_data.get('address', '')
-                profile.gender = profile_data.get('gender', '')
-                profile.save()
-            user.profile = profile
-            user.save()
+            profile = UserProfile.objects.create(user=user, **profile_data)
+            profile.save()
 
         return user
-
 
 class UserSerializer(serializers.ModelSerializer):
     picture_url = serializers.CharField(source='profile.picture_url')
@@ -98,12 +85,14 @@ class UpdateUserSerializer(serializers.ModelSerializer):
                     'picture_url': profile_data.get('picture_url', instance.profile.picture_url),
                     'address': profile_data.get('address', instance.profile.address),
                     'gender': profile_data.get('gender', instance.profile.gender),
+                    'phone_number': profile_data.get('phone_number', instance.profile.phone_number),
                 }
             )
             if not created:
                 profile.picture_url = profile_data.get('picture_url', instance.profile.picture_url)
                 profile.address = profile_data.get('address', instance.profile.address)
                 profile.gender = profile_data.get('gender', instance.profile.gender)
+                profile.phone_number = profile_data.get('phone_number', instance.profile.phone_number)
                 profile.save()
             instance.profile = profile
 
@@ -112,3 +101,4 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.save()
         return instance
+

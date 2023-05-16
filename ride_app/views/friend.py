@@ -54,6 +54,8 @@ def friend_requests_received(request):
     return Response(serializer.data, status=200)
 
 
+from django.db.models import Q
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def mutual_friends(request):
@@ -66,14 +68,36 @@ def mutual_friends(request):
     friends1 = Friends.objects.filter(Q(user1=user1) | Q(user2=user1))
     friends2 = Friends.objects.filter(Q(user1=user2) | Q(user2=user2))
 
-    mutual_friends = []
-    for friend1 in friends1:
-        for friend2 in friends2:
-            if (friend1.user1 == friend2.user1 or friend1.user1 == friend2.user2
-                    or friend1.user2 == friend2.user1 or friend1.user2 == friend2.user2):
-                mutual_friend = friend1.user1 if friend1.user1 != user1 else friend1.user2
-                mutual_friends.append(mutual_friend)
+    friends1_user_ids = set(friends1.values_list('user1_id', flat=True)) | set(friends1.values_list('user2_id', flat=True))
+    friends2_user_ids = set(friends2.values_list('user1_id', flat=True)) | set(friends2.values_list('user2_id', flat=True))
+
+    mutual_friends = friends1_user_ids.intersection(friends2_user_ids)
+
+    # Exclude user1 and user2 from mutual friends
+    mutual_friends.discard(user1.id)
+    mutual_friends.discard(user2.id)
+
+    mutual_friends = User.objects.filter(id__in=mutual_friends)
 
     serializer = UserSerializer(mutual_friends, many=True)
     return Response(serializer.data)
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_friends(request):
+    user_id = request.user.id
+    user = get_object_or_404(User, id=user_id)
+
+    friends1 = Friends.objects.filter(user1=user)
+    friends2 = Friends.objects.filter(user2=user)
+
+    friend_user_ids = set(friends1.values_list('user2_id', flat=True)) | set(friends2.values_list('user1_id', flat=True))
+
+    friends = User.objects.filter(id__in=friend_user_ids)
+
+    serializer = UserSerializer(friends, many=True)
+    return Response(serializer.data)
