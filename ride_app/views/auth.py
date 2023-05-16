@@ -20,30 +20,34 @@ def signup(request):
         user = signup_serializer.save()
         user_serializer = UserSerializer(user)
 
-        random_uuid = uuid.uuid1()
-        file, ext = os.path.splitext(request.data['file'].name)
-        bucket_name = 'ride-app'
-        obj_key = f"profile_imgs/{random_uuid}{ext}"
+        if 'file' in request.data:
+            random_uuid = uuid.uuid1()
+            file, ext = os.path.splitext(request.data['file'].name)
+            bucket_name = 'ride-app'
+            obj_key = f"profile_imgs/{random_uuid}{ext}"
 
-        s3 = boto3.client('s3')
-        s3.upload_fileobj(request.data['file'].file, bucket_name, obj_key)
+            s3 = boto3.client('s3')
+            s3.upload_fileobj(request.data['file'].file, bucket_name, obj_key)
 
-        print(f'Successfully uploaded!')
+            print(f'Successfully uploaded!')
 
-        url = f"https://{bucket_name}.s3.amazonaws.com/{obj_key}"
+            url = f"https://{bucket_name}.s3.amazonaws.com/{obj_key}"
 
-        # Update user profile with the URL
-        profile = user.profile
-        profile.picture_url = url
-        profile.save()
+            # Update user profile with the URL
+            profile = user.profile
+            profile.picture_url = url
+            profile.save()
 
-        # Retrieve updated user profile data
-        profile_serializer = UserProfileSerializer(profile)
-        profile_data = profile_serializer.data
+            # Retrieve updated user profile data
+            profile_serializer = UserProfileSerializer(profile)
+            profile_data = profile_serializer.data
 
-        # Merge user and profile data
-        data = user_serializer.data
-        data.update(profile_data)
+            # Merge user and profile data
+            data = user_serializer.data
+            data.update(profile_data)
+        else:
+            # No file provided, return only user data
+            data = user_serializer.data
 
         return Response(data=data, status=status.HTTP_201_CREATED)
     else:
