@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import mixins, status, viewsets
+from django.http import JsonResponse
+
 
 from ride_app.serializer.auth import SignupSerializer, UserSerializer, UserProfileSerializer, UpdateUserSerializer
 
@@ -106,6 +108,15 @@ def update_user(request):
             return Response(data=data, status=status.HTTP_200_OK)
     else:
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def check_email_unique(request):
+    email = request.GET.get('email', None)
+
+    # Perform the email uniqueness check in your database
+    is_unique = not User.objects.filter(email=email).exists()
+
+    return JsonResponse({'isUnique': is_unique})
 
 class UserDetail(RetrieveAPIView):
     queryset = User.objects.all()
