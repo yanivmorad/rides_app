@@ -4,5 +4,7 @@ djangorestframework
 django-cors-headers
 djangorestframework-simplejwt
 gunicorn
-boto3
+boto3==1.26.123
 uuid
+botocore==1.29.123
+s3transfer==0.6.0
