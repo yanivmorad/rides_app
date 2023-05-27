@@ -1,6 +1,5 @@
 import os
 import uuid
-
 import boto3
 from django.contrib.auth.models import User
 from rest_framework.generics import RetrieveAPIView
@@ -10,6 +9,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import mixins, status, viewsets
 from django.http import JsonResponse
+from django.db import transaction
+
 
 
 from ride_app.serializer.auth import SignupSerializer, UserSerializer, UserProfileSerializer, UpdateUserSerializer
@@ -68,7 +69,6 @@ def me(request):
     # you will get here only if the user is already authenticated!
     user_serializer = UserSerializer(instance=request.user, many=False)
     return Response(data=user_serializer.data)
-from django.db import transaction
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
@@ -104,6 +104,7 @@ def update_user(request):
 
             data = user_serializer.data
             data.update(profile_data)
+            print('Data:', data)  # Add debug output statement
 
             return Response(data=data, status=status.HTTP_200_OK)
     else:
