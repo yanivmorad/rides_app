@@ -2,6 +2,7 @@ import os
 import uuid
 import boto3
 from django.contrib.auth.models import User
+from django.db.models import Q
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,6 +11,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import mixins, status, viewsets
 from django.http import JsonResponse
 from django.db import transaction
+from django.db.models.functions import Length
+
 
 
 
@@ -119,6 +122,20 @@ def check_email_unique(request):
 
     return JsonResponse({'isUnique': is_unique})
 
+@api_view(['GET'])
+def search_users(request):
+    name = request.GET.get('name', '')
+    parts = name.split(' ')
+    first_name = parts[0]
+    last_name = parts[1] if len(parts) > 1 else ''
+
+    users = User.objects.filter(
+        Q(first_name__istartswith=first_name) & Q(last_name__istartswith=last_name)
+    ).annotate(full_name_length=Length('first_name') + Length('last_name')).order_by('full_name_length')
+
+    serializer = UserSerializer(users, many=True)
+    serialized_data = serializer.data
+    return Response(serialized_data)
 class UserDetail(RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
