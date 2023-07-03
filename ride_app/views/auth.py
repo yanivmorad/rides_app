@@ -2,19 +2,16 @@ import os
 import uuid
 import boto3
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, F, Value
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, status
 from django.http import JsonResponse
 from django.db import transaction
-from django.db.models.functions import Length
-
-
-
+from django.db.models.functions import  Concat
 
 from ride_app.serializer.auth import SignupSerializer, UserSerializer, UserProfileSerializer, UpdateUserSerializer
 
@@ -129,9 +126,15 @@ def search_users(request):
     first_name = parts[0]
     last_name = parts[1] if len(parts) > 1 else ''
 
-    users = User.objects.filter(
-        Q(first_name__istartswith=first_name) & Q(last_name__istartswith=last_name)
-    ).annotate(full_name_length=Length('first_name') + Length('last_name')).order_by('full_name_length')
+    users = User.objects.annotate(
+        full_name=Concat('first_name', Value(' '), 'last_name')
+    ).filter(
+        Q(first_name__istartswith=first_name) |
+        Q(last_name__istartswith=first_name) |
+        Q(full_name__istartswith=first_name)
+    ).order_by(
+        F('first_name').desc(nulls_last=True), 'last_name'
+    )
 
     serializer = UserSerializer(users, many=True)
     serialized_data = serializer.data

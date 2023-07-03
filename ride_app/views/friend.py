@@ -81,10 +81,7 @@ def mutual_friends(request):
 
     serializer = UserSerializer(mutual_friends, many=True)
     return Response(serializer.data)
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
