@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,6 +25,7 @@ SECRET_KEY = 'django-insecure-plh&dfn@$a5tc7l$2*5142q!7qk61h(_&qc)4m0&!29thsx#wc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -80,25 +80,14 @@ WSGI_APPLICATION = 'rides.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'ride_app',
-#         'USER': 'postgres',
-#         'PASSWORD': 'yaniv1212',
-#         'HOST': '127.0.0.1',
-#         'PORT': '1212',
-#     }
-# }
-#
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ride_pals',
-        'USER': 'ride_pals_user',
-        'PASSWORD': 'ah74yfLQToubezyeeZbFac38oiFHYlsm',
-        'HOST': 'dpg-ctht0hogph6c73d1ics0-a.oregon-postgres.render.com',
-        'PORT': '5432',
+        'NAME': 'ride_app',
+        'USER': 'postgres',
+        'PASSWORD': 'yaniv1212',
+        'HOST': '127.0.0.1',
+        'PORT': '1212',
     }
 }
 
