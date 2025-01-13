@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,7 +80,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rides.wsgi.application'
 
+from urllib.parse import urlparse
 
+db_url = "postgresql://ride_palsdb_owner:12CaxmVgsKun@ep-divine-flower-a5gmne8x.us-east-2.aws.neon.tech/ride_palsdb?sslmode=require"
+
+# ניתוח המחרוזת
+tmpPostgres = urlparse(db_url)
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path[1:],  # מסיר את הסלאש הראשון
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': tmpPostgres.port or 5432,
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
+
+#
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -91,20 +116,6 @@ WSGI_APPLICATION = 'rides.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ride_pals',
-        'USER': 'ride_pals_user',
-        'PASSWORD': 'ah74yfLQToubezyeeZbFac38oiFHYlsm',
-        'HOST': 'dpg-ctht0hogph6c73d1ics0-a.oregon-postgres.render.com',
-
-        'PORT': '5432',
-    }
-}
-
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
